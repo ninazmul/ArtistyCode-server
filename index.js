@@ -1,15 +1,14 @@
-const express = require('express');
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 //middleware
 app.use(cors());
 app.use(express.json());
-
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.rlm0ljx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -33,7 +32,7 @@ async function run() {
 
     const reviewCollection = client.db("projectsDB").collection("reviews");
 
-
+    const jobCollection = client.db("projectsDB").collection("jobs");
 
     // jwt related api
     app.post("/jwt", async (req, res) => {
@@ -137,10 +136,10 @@ async function run() {
 
     app.get("/items/:id", async (req, res) => {
       const id = req.params.id;
-      const query={_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) };
       const result = await itemCollection.findOne(query);
       res.send(result);
-    })
+    });
 
     app.post("/items", verifyToken, verifyAdmin, async (req, res) => {
       const item = req.body;
@@ -161,12 +160,12 @@ async function run() {
           liveLink: item.liveLink,
           videoURL: item.videoURL,
           imgURL: item.imgURL,
-          audioURL: item.audioURL
+          audioURL: item.audioURL,
         },
-      }
+      };
       const result = await itemCollection.updateOne(filter, updatedDoc);
       res.send(result);
-    })
+    });
 
     app.delete("/items/:id", verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
@@ -217,7 +216,52 @@ async function run() {
       res.send(result);
     });
 
-    // admin stats 
+    // job api
+
+    app.get("/jobs", async (req, res) => {
+      const result = await jobCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/jobs/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await jobCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.post("/jobs", verifyToken, async (req, res) => {
+      const job = req.body;
+      const result = await jobCollection.insertOne(job);
+      res.send(result);
+    });
+
+    app.patch("/jobs/:id", verifyToken, async (req, res) => {
+      const job = req.body;
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          name: job.name,
+          phone: job.phone,
+          email: job.email,
+          linkedin: job.linkedin,
+          github: job.github,
+          resume: job.resume,
+        },
+      };
+      const result = await jobCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
+    app.delete("/jobs/:id", verifyToken, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await jobCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // admin stats
     app.get("/admin-stats", verifyToken, verifyAdmin, async (req, res) => {
       const users = await userCollection.estimatedDocumentCount();
       const items = await itemCollection.estimatedDocumentCount();
@@ -226,6 +270,7 @@ async function run() {
         users,
         items,
         reviews,
+        jobs,
       });
     });
 
