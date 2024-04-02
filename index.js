@@ -236,25 +236,8 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/jobs/:id", verifyToken, async (req, res) => {
-      const job = req.body;
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const updatedDoc = {
-        $set: {
-          name: job.name,
-          phone: job.phone,
-          email: job.email,
-          linkedin: job.linkedin,
-          github: job.github,
-          resume: job.resume,
-        },
-      };
-      const result = await jobCollection.updateOne(filter, updatedDoc);
-      res.send(result);
-    });
 
-    app.delete("/jobs/:id", verifyToken, verifyAdmin, async (req, res) => {
+    app.delete("/jobs/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await jobCollection.deleteOne(query);
