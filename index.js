@@ -266,6 +266,7 @@ async function run() {
       const users = await userCollection.estimatedDocumentCount();
       const items = await itemCollection.estimatedDocumentCount();
       const reviews = await reviewCollection.estimatedDocumentCount();
+      const jobs = await jobCollection.estimatedDocumentCount();
       res.send({
         users,
         items,
@@ -286,9 +287,9 @@ async function run() {
 }
 run().catch(console.dir);
 app.get("/", (req, res) => {
-  res.send("N.I. Nazmul's portfolio server is running...");
+  res.send("ArtistyCode Studio server is running...");
 });
 
 app.listen(port, () => {
-  console.log(`N.I. Nazmul's portfolio server is running on port ${port}`);
+  console.log(`ArtistyCode Studio server is running on port ${port}`);
 });
